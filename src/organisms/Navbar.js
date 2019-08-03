@@ -7,10 +7,10 @@ export default function Navbar() {
             <a className="navbar-brand" href="/">Navbar</a>
             <ul className="nav nav-pills">
                 <li className="nav-item">
-                <a className="nav-link" href="#fat">@fat</a>
+                <a className="nav-link" href="#fat">Something</a>
                 </li>
                 <li className="nav-item">
-                <a className="nav-link" href="#mdo">@mdo</a>
+                <a className="nav-link" href="#mdo">Cool Button</a>
                 </li>
                 <li className="nav-item dropdown">
                 <a className="nav-link dropdown-toggle" data-toggle="dropdown" href="/" role="button" aria-haspopup="true" aria-expanded="false">Dropdown</a>
