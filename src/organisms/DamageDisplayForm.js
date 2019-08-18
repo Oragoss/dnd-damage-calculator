@@ -6,11 +6,14 @@ import DummyACFormGroup from '../molecules/DummyACFormGroup';
 
 export default class DamageDisplayForm extends React.Component {
     state = {
-        greatswordDamage: 0,
-        greataxeDamage: 0,
+        mainWeapon: 'GreatSword',   //TODO: make this dynamic
+        compareWeapon: 'GreatAxe',
+        totalMainWeaponDamage: 0,
+        totalCompareWeapon: 0,
+        averageMainWeaponDamage: 0,
+        averageCompareWeaponDamage: 0,
         targetDummyAC: 10,
         rounds: 100,
-        recordedHit: 0,
         bonusHit: 0
     }
 
@@ -44,6 +47,8 @@ export default class DamageDisplayForm extends React.Component {
 
         let totalGSDamage = 0;
         let totalGADamage = 0;
+        let averageGreatSwordDamage = 0;
+        let averageGreatAxeDamage = 0;
         const chance = Number(hitChance) + Number(this.state.bonusHit);
 
         for (let i = 0; i < rounds; i++) {
@@ -59,25 +64,30 @@ export default class DamageDisplayForm extends React.Component {
                 totalGSDamage += greatSwordHitDie;
                 totalGADamage += greatAxeHitDie;
             }
-    }
+        }
 
-    if(chance < targetDummyAC) {
-        this.setState({
-            greatswordDamage: "Miss!",
-            greataxeDamage: "Miss!",
-            recordedHit: chance
-        });
-    } else {
+        averageGreatSwordDamage = Number(totalGSDamage/rounds).toFixed(2);
+        averageGreatAxeDamage = Number(totalGADamage/rounds).toFixed(2);
+
+        if(chance < targetDummyAC) {
             this.setState({
-            greatswordDamage: totalGSDamage,
-            greataxeDamage: totalGADamage,
-            recordedHit: chance
+                totalMainWeaponDamage: "Miss!",
+                totalCompareWeapon: "Miss!",
+                averageMainWeaponDamage: '',
+                averageCompareWeaponDamage: ''
+            });
+        } else {
+            this.setState({
+                totalMainWeaponDamage: totalGSDamage,
+                totalCompareWeapon: totalGADamage,
+                averageMainWeaponDamage: averageGreatSwordDamage,
+                averageCompareWeaponDamage: averageGreatAxeDamage
             });
         }
     }
 
     render() {
-        const { greatswordDamage, greataxeDamage, targetDummyAC, bonusHit, rounds, recordedHit} = this.state;
+        const { totalMainWeaponDamage, totalCompareWeapon, targetDummyAC, bonusHit, rounds, averageMainWeaponDamage, averageCompareWeaponDamage} = this.state;
 
         return (
             <div className="App">
@@ -89,18 +99,37 @@ export default class DamageDisplayForm extends React.Component {
                         <button type="submit" className="btn btn-success" onClick={this.calculate}>Calculate!</button>
                     </div>
                 </div>
+                <div className="container text-center main">
+                    <h2>After {rounds} rounds</h2>
+                    <div className="row">
+                        <select className="col-md-3">
+                            <option value="volvo">Volvo</option>
+                            <option value="saab">Saab</option>
+                            <option value="mercedes">Mercedes</option>
+                            <option value="audi">Audi</option>
+                        </select>
+                        <div className="col-md-3"></div>
+                        <div className="col-md-3"></div>
+                        <select className="col-md-3">
+                            <option value="volvo">Volvo</option>
+                            <option value="saab">Saab</option>
+                            <option value="mercedes">Mercedes</option>
+                            <option value="audi">Audi</option>
+                        </select>
+                    </div>
+                </div>
                 <header className="App-header">
                     <div className="row">
-                        <span className="col-md-12">Hit was:</span>
-                        <span className="col-md-12">{recordedHit}</span>
+                        <span className="col-md-12">Total Greatsword Damage</span>
+                        <span className="col-md-12">{totalMainWeaponDamage}</span>
+                        <span className="col-md-12">Average Greatsword Damage per Round</span>
+                        <span className="col-md-12">{averageMainWeaponDamage}</span>
                     </div>
                     <div className="row">
-                        <span className="col-md-12">Greatsword Damage</span>
-                        <span className="col-md-12">{greatswordDamage}</span>
-                    </div>
-                    <div className="row">
-                        <span className="col-md-12">Greataxe Damage</span>
-                        <span className="col-md-12">{greataxeDamage}</span>
+                        <span className="col-md-12">Total Greataxe Damage</span>
+                        <span className="col-md-12">{totalCompareWeapon}</span>
+                        <span className="col-md-12">Average Greataxe Damage per Round</span>
+                        <span className="col-md-12">{averageCompareWeaponDamage}</span>
                     </div>
                 </header>
             </div>
