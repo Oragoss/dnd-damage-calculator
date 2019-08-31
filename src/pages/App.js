@@ -6,7 +6,6 @@ function App() {
   return (
     <React.Fragment>
       <Navbar />
-      {/* <div className="empty-space"></div> */}
       <DamageDisplayForm />
     </React.Fragment>
   );

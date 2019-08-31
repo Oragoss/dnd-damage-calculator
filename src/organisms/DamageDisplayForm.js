@@ -3,22 +3,31 @@ import '../App.css';
 import RoundsFormGroup from '../molecules/RoundsFormGroup';
 import BonusHitFormGroup from '../molecules/BonusHitFormGroup';
 import DummyACFormGroup from '../molecules/DummyACFormGroup';
+import weaponData from '../weaponData';
 
 export default class DamageDisplayForm extends React.Component {
     state = {
-        mainWeapon: 'GreatSword',   //TODO: make this dynamic
-        compareWeapon: 'GreatAxe',
+        mainWeapon: '',
+        compareWeapon: '',
+        mainWeaponIndex: 0,    //Arbitrary Default 13
+        compareWeaponIndex: 0, //Arbitrary Default 15
         totalMainWeaponDamage: 0,
         totalCompareWeapon: 0,
         averageMainWeaponDamage: 0,
         averageCompareWeaponDamage: 0,
         targetDummyAC: 10,
         rounds: 100,
-        bonusHit: 0
+        bonusHit: 0,
+        weaponSelectComponent: null
     }
 
     componentDidMount() {
-        this.calculate();
+        const {mainWeaponIndex, compareWeaponIndex} = this.state;
+        this.setState({
+            mainWeapon: weaponData[mainWeaponIndex].name,
+            compareWeapon: weaponData[compareWeaponIndex].name
+        }, ()=> this.calculate());
+        this.createWeaponOptions();
     }
 
     changeBonusHitDC = (e) => {
@@ -39,9 +48,26 @@ export default class DamageDisplayForm extends React.Component {
         }, ()=>{this.calculate()});
     }
 
-    calculate = () => {
-        const hitChance = Math.floor((Math.random() * 20) + 1);
+    changeMainWeaponIndex = (e) => {
+        const weaponIndex = e.target.value;
 
+        this.setState({
+            mainWeaponIndex : weaponIndex,
+            mainWeapon : weaponData[weaponIndex].name
+        });
+    }
+
+    changeCompareWeaponIndex = (e) => {
+        const weaponIndex = e.target.value;
+        console.log(weaponIndex);
+
+        this.setState({
+            compareWeaponIndex : weaponIndex,
+            compareWeapon : weaponData[weaponIndex].name
+        });
+    }
+
+    calculate = () => {
         const targetDummyAC = this.state.targetDummyAC;
         const rounds = this.state.rounds;
 
@@ -49,13 +75,15 @@ export default class DamageDisplayForm extends React.Component {
         let totalGADamage = 0;
         let averageGreatSwordDamage = 0;
         let averageGreatAxeDamage = 0;
-        const chance = Number(hitChance) + Number(this.state.bonusHit);
 
         for (let i = 0; i < rounds; i++) {
+            let hitChance = Math.floor((Math.random() * 20) + 1);
+            let chance = Number(hitChance) + Number(this.state.bonusHit);
+
             let greatSwordHitDie = Math.floor((Math.random() * 6) + 1) + Math.floor((Math.random() * 6) + 1);
             let greatAxeHitDie = Math.floor((Math.random() * 12) + 1);
 
-            if(chance >= targetDummyAC) {
+            if(hitChance === 20 || chance >= targetDummyAC) {
                 if(hitChance === 20) {
                     greatSwordHitDie += Math.floor((Math.random() * 6) + 1);
                     greatAxeHitDie += greatAxeHitDie;
@@ -69,26 +97,38 @@ export default class DamageDisplayForm extends React.Component {
         averageGreatSwordDamage = Number(totalGSDamage/rounds).toFixed(2);
         averageGreatAxeDamage = Number(totalGADamage/rounds).toFixed(2);
 
-        if(chance < targetDummyAC) {
-            this.setState({
-                totalMainWeaponDamage: "Miss!",
-                totalCompareWeapon: "Miss!",
-                averageMainWeaponDamage: '',
-                averageCompareWeaponDamage: ''
-            });
-        } else {
-            this.setState({
-                totalMainWeaponDamage: totalGSDamage,
-                totalCompareWeapon: totalGADamage,
-                averageMainWeaponDamage: averageGreatSwordDamage,
-                averageCompareWeaponDamage: averageGreatAxeDamage
-            });
-        }
+        this.setState({
+            totalMainWeaponDamage: totalGSDamage,
+            totalCompareWeapon: totalGADamage,
+            averageMainWeaponDamage: averageGreatSwordDamage,
+            averageCompareWeaponDamage: averageGreatAxeDamage
+        });
+    }
+
+    createWeaponOptions = () => {
+        const options = weaponData.map((elem, index) => {
+            return <option key={`${elem}-${index}`} value={index}>{elem.name}</option>;
+        });
+
+        const weaponSelectComponent =
+        (<React.Fragment>
+            <select className="col-md-3 form-group" onChange={this.changeMainWeaponIndex}>
+                {options}
+            </select>
+            <div className="col-md-3"></div>
+            <div className="col-md-3"></div>
+            <select className="col-md-3 form-group" onChange={this.changeCompareWeaponIndex}>
+                {options}
+            </select>
+        </React.Fragment>);
+
+        this.setState({
+            weaponSelectComponent
+        });
     }
 
     render() {
-        const { totalMainWeaponDamage, totalCompareWeapon, targetDummyAC, bonusHit, rounds, averageMainWeaponDamage, averageCompareWeaponDamage} = this.state;
-
+        const {mainWeapon, compareWeapon, totalMainWeaponDamage, totalCompareWeapon, targetDummyAC, bonusHit, rounds, averageMainWeaponDamage, averageCompareWeaponDamage} = this.state;
         return (
             <div className="App">
                 <div className="container-fluid">
@@ -102,33 +142,20 @@ export default class DamageDisplayForm extends React.Component {
                 <div className="container text-center main">
                     <h2>After {rounds} rounds</h2>
                     <div className="row">
-                        <select className="col-md-3">
-                            <option value="volvo">Volvo</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
-                            <option value="audi">Audi</option>
-                        </select>
-                        <div className="col-md-3"></div>
-                        <div className="col-md-3"></div>
-                        <select className="col-md-3">
-                            <option value="volvo">Volvo</option>
-                            <option value="saab">Saab</option>
-                            <option value="mercedes">Mercedes</option>
-                            <option value="audi">Audi</option>
-                        </select>
+                        {this.state.weaponSelectComponent}
                     </div>
                 </div>
                 <header className="App-header">
                     <div className="row">
-                        <span className="col-md-12">Total Greatsword Damage</span>
+                        <span className="col-md-12">Total {mainWeapon} Damage</span>
                         <span className="col-md-12">{totalMainWeaponDamage}</span>
-                        <span className="col-md-12">Average Greatsword Damage per Round</span>
+                        <span className="col-md-12">Average {mainWeapon} Damage per Round</span>
                         <span className="col-md-12">{averageMainWeaponDamage}</span>
                     </div>
                     <div className="row">
-                        <span className="col-md-12">Total Greataxe Damage</span>
+                        <span className="col-md-12">Total {compareWeapon} Damage</span>
                         <span className="col-md-12">{totalCompareWeapon}</span>
-                        <span className="col-md-12">Average Greataxe Damage per Round</span>
+                        <span className="col-md-12">Average {compareWeapon} Damage per Round</span>
                         <span className="col-md-12">{averageCompareWeaponDamage}</span>
                     </div>
                 </header>
